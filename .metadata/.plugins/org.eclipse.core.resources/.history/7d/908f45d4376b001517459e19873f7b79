@@ -1,0 +1,43 @@
+package test1;
+import java.security.*;
+
+import com.amazonaws.auth.*;
+import com.amazonaws.services.s3.AmazonS3EncryptionClient;
+import com.amazonaws.services.s3.model.EncryptionMaterials;
+import com.amazonaws.services.s3.model.S3Object;
+import test1.BasicAWSCredentials;
+
+
+public class testencryp {
+	 
+	public static void main()
+	{
+		 String myAccessKeyID;
+		 String mySecretKey;
+		myAccessKeyID="AKIAJE4OVSEU2TH46V3Q";
+		mySecretKey="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";
+			
+	KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+	keyGenerator.initialize(1024, new SecureRandom());
+	KeyPair myKeyPair = keyGenerator.generateKeyPair();
+
+
+	
+	AWSCredentials credentials = new BasicAWSCredentials(myAccessKeyID, mySecretKey);
+	EncryptionMaterials encryptionMaterials = new EncryptionMaterials(myKeyPair);
+	AmazonS3EncryptionClient s3 = new AmazonS3EncryptionClient(credentials, encryptionMaterials);
+
+
+	// Then just use the encryption client as normal...
+	//
+	// When we use the putObject method, the data in the file or InputStream
+	// we specify is encrypted on the fly as it's uploaded to Amazon S3.
+	s3.putObject(bucketName, key, myFile);
+
+
+	// When you use the getObject method, the data retrieved from Amazon S3
+	// is automatically decrypted on the fly.
+	S3Object downloadedObject = s3.getObject(bucketName, key);
+	}
+
+}

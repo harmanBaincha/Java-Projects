@@ -1,0 +1,17 @@
+<Personnel>
+  <Employee type="permanent">
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>WRVx97NGR6FZbuBRNMPukhGIcLbdYkOa</CipherText></EncryptedData>
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>2tE4Od0PRtgfwPmyxXvPlA==</CipherText></EncryptedData>
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>ZZf8JRotRaB878QDikq63Q==</CipherText></EncryptedData>
+   </Employee>
+  <Employee type="contract">
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>S8J/2NF+DQFdtbIBTtJsm+BZjf2Cgzg6</CipherText></EncryptedData>
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>hGE3lpw1o4sfwPmyxXvPlA==</CipherText></EncryptedData>
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>ImuKc0dmZSB878QDikq63Q==</CipherText></EncryptedData>
+    </Employee>
+  <Employee type="permanent">
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>TpWR8BpLiiCV+0dkVaWQikB8X5pu9twe</CipherText></EncryptedData>
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>9NHHFLccxjsfwPmyxXvPlA==</CipherText></EncryptedData>
+        <EncryptedData xmlns="http://www.exampleorg/xmlenc"><DecryptionInfo><Method Algorithm="http://www.example.org/xmlenc/des"></Method><PropertyList></PropertyList><Key><Value>PnY9waiFxIo=</Value></Key></DecryptionInfo><CipherText>cDYNSRbk+Bd878QDikq63Q==</CipherText></EncryptedData>
+    </Employee>
+</Personnel>

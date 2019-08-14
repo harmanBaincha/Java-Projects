@@ -1,0 +1,59 @@
+package test1;
+import java.security.*;
+
+import com.amazonaws.auth.*;
+import com.amazonaws.services.s3.AmazonS3EncryptionClient;
+import com.amazonaws.services.s3.model.EncryptionMaterials;
+import com.amazonaws.services.s3.model.S3Object;
+
+
+
+public class testencryp {
+	private String myAccessKeyID;
+	private String mySecretKey;
+	
+	// Generates a sample asymmetric key pair.
+	//
+	// IMPORTANT: In a real application, you need to save your encryption
+//	            key pair somewhere so you don't lose it when the JVM exits.
+//	            Your encryption keys NEVER leave your application,
+//	            so it's important that you safely manage them.
+//	            AWS doesn't know anything about your encryption keys, so
+//	            if you lose them, AWS can't help you recover them, or help
+//	            you decrypt any stored data.
+	//
+	// Several good online sources explain how to easily create an RSA key pair
+	// from the command line using OpenSSL, for example:
+	// http://en.wikibooks.org/wiki/Transwiki:Generate_a_keypair_using_OpenSSL
+	testencryp()
+	{
+		myAccessKeyId=new BasicAWSCredentials.getAWSAccessKeyId();
+				mySecretKey=klRU/5TNYmzu6nVGOUPGZrSkS8eoHyyg+btdLD2p;
+	}
+	public static void main()
+	{
+		
+	KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+	keyGenerator.initialize(1024, new SecureRandom());
+	KeyPair myKeyPair = keyGenerator.generateKeyPair();
+
+
+	// Construct an instance of AmazonS3EncryptionClient
+	AWSCredentials credentials = new BasicAWSCredentials(myAccessKeyId, mySecretKey);
+	EncryptionMaterials encryptionMaterials = new EncryptionMaterials(myKeyPair);
+	AmazonS3EncryptionClient s3 = new AmazonS3EncryptionClient(credentials, encryptionMaterials);
+
+
+	// Then just use the encryption client as normal...
+	//
+	// When we use the putObject method, the data in the file or InputStream
+	// we specify is encrypted on the fly as it's uploaded to Amazon S3.
+	s3.putObject(bucketName, key, myFile);
+
+
+	// When you use the getObject method, the data retrieved from Amazon S3
+	// is automatically decrypted on the fly.
+	S3Object downloadedObject = s3.getObject(bucketName, key);
+	}
+
+}

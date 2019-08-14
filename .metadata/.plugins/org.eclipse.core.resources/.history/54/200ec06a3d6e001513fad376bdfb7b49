@@ -1,0 +1,25 @@
+package xml.encryp;
+
+import java.security.Security;
+
+import org.w3c.dom.Document;
+
+public class encyp {
+	private static Document document;
+    
+    private static int iDecryptionInfoCounter = 0;
+
+	public static void main(String argv[]) {
+
+	    try {
+
+		
+				Security.addProvider(new com.sun.crypto.provider.SunJCE());
+	    	    
+			    encrypt();
+	    }
+	    catch (Exception e) {
+			e.printStackTrace();
+		    }
+	}
+}

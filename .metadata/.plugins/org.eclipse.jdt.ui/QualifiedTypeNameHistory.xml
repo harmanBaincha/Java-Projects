@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="java.security.KeyPairGenerator"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.ec2.model.KeyPair"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.EncryptionMaterials"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.AmazonS3EncryptionClient"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.S3Object"/>
+<fullyQualifiedTypeName name="com.amazonaws.auth.AWSCredentials"/>
+<fullyQualifiedTypeName name="test1.BasicAWSCredentials"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="javax.crypto.SecretKey"/>
+<fullyQualifiedTypeName name="javax.crypto.Cipher"/>
+<fullyQualifiedTypeName name="javax.crypto.KeyGenerator"/>
+<fullyQualifiedTypeName name="javax.crypto.spec.DESKeySpec"/>
+<fullyQualifiedTypeName name="javax.crypto.SecretKeyFactory"/>
+<fullyQualifiedTypeName name="java.security.Security"/>
+<fullyQualifiedTypeName name="org.xml.sax.InputSource"/>
+</qualifiedTypeNameHistroy>

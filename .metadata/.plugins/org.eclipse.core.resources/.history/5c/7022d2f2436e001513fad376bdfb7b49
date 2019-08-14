@@ -1,0 +1,67 @@
+package xml.encryp;
+
+import java.io.*;
+import java.security.Security;
+
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+public class encyp {
+	private static Document document;
+    
+    private static int iDecryptionInfoCounter = 0;
+
+	public static void main(String argv[]) {
+
+	    try {
+
+		
+				Security.addProvider(new com.sun.crypto.provider.SunJCE());
+	    	    
+			    encrypt();
+	    }
+	    catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void encrypt() {	    
+	    
+	    System.out.println("Encrypt...");
+        
+        String xmlFile = "/home/harmanjeet/Documents/emp.xml"; 
+
+        DOMParser parser = new DOMParser();
+
+        try {
+            parser.parse(xmlFile);
+
+        } catch (SAXException se) {
+            se.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+        document = parser.getDocument();
+        encryptChildNodes((Node) document);
+        try {
+
+    		String string = getElementAsString(document.getDocumentElement(), false);
+			
+			File fileOut = new File("XmlEncryptionTestEncryptedNodes" + ".xml");
+			FileWriter fw = new FileWriter(fileOut);
+			PrintWriter pw = new PrintWriter(fw, true);
+			
+			pw.print(string);
+			
+			pw.close();
+		
+		} catch (Exception ex) {
+			
+			System.out.println("Exception: " + ex);
+		}
+	}
+	
+}
+

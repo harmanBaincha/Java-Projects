@@ -1,0 +1,35 @@
+<Personnel>
+  <Employee type="permanent">
+<EncryptedData xmlns="http://www.exampleorg/xmlenc">
+<DecryptionInfo>
+<Method Algorithm="http://www.example.org/xmlenc/des"></Method>
+<PropertyList></PropertyList>
+<Key><Value>+LCKwhYT8jI=</Value></Key>
+</DecryptionInfo>
+<CipherText>IOdzR2WxuKKYCYLTL67nqI2bYnw5JIkl0En1b5zbWz9tr3ycF4/wnCDnc0dlsbiiD7b/CrcsnyGa
+JCkmnLP2UGF3dOItraW3ODth3EXXLk3FLaqe0nOwUpHvajtsEN0HPnZ8TdlldtQ=</CipherText>
+</EncryptedData>
+</Employee>
+<Employee type="contract">
+<EncryptedData xmlns="http://www.exampleorg/xmlenc">
+<DecryptionInfo>
+<Method Algorithm="http://www.example.org/xmlenc/des"></Method>
+<PropertyList></PropertyList>
+<Key><Value>jzEcjP6bm60=</Value></Key>
+</DecryptionInfo>
+<CipherText>93TXL5NCmlkthrARhZ/njSsKHP322+BV+kVL6Rj3N2ujh3V+udjsrfd01y+TQppZdYTrbJYMyUtd
+tBjECx93oFzp8ZvlCpVmlxJD3Wh7uZYorXHmTA1QBkcmHl2LJHp2XOzKXNlzAJM=</CipherText>
+</EncryptedData>
+</Employee>
+<Employee type="permanent">
+<EncryptedData xmlns="http://www.exampleorg/xmlenc">
+<DecryptionInfo>
+<Method Algorithm="http://www.example.org/xmlenc/des"></Method>
+<PropertyList></PropertyList>
+<Key><Value>2U831UnNgCo=</Value></Key>
+</DecryptionInfo>
+<CipherText>/22xly4cC0K6ksoOOP2p+J/Kgy6Kuz+z7doA1mI3GNN/XU8/syLSzn//2Ck9T80p6jQtKOnZ9R/I
+ptea5kSouv9tsZcuHAtCTBGzPVGHM9bquxOu4CUn6k+APtyqmOkn5cP/r0CrSxo=</CipherText>
+</EncryptedData>
+</Employee>
+</Personnel>

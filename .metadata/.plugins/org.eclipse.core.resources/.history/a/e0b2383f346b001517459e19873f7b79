@@ -1,0 +1,7 @@
+package test1;
+
+public class BasicAWSCredentials
+extends java.lang.Object
+implements AWSCredentials {
+	
+}

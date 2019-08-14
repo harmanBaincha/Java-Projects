@@ -1,0 +1,736 @@
+package XmlParsingeg;
+
+import org.w3c.dom.*;
+import java.io.*;
+import org.apache.xerces.dom.*;
+import org.apache.xerces.parsers.DOMParser;	
+import java.security.Security;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import sun.misc.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+	public class EncXml {
+		private static Document document;
+	    
+	    private static int iDecryptionInfoCounter = 0;
+	
+		public static void main(String argv[]) {
+
+		    try {
+
+			
+					Security.addProvider(new com.sun.crypto.provider.SunJCE());
+		    	    
+				    encrypt();
+				    
+				    decrypt();
+
+		    } catch (Exception e) {
+			e.printStackTrace();
+		    }
+		  }
+		public static void encrypt() {	    
+		    
+		    System.out.println("Encrypt...");
+	        
+	        String xmlFile = "/home/harmanjeet/Documents/emp.xml"; 
+
+	        DOMParser parser = new DOMParser();
+
+	        try {
+	            parser.parse(xmlFile);
+
+	        } catch (SAXException se) {
+	            se.printStackTrace();
+	        } catch (IOException ioe) {
+	            ioe.printStackTrace();
+	        }
+
+	        document = parser.getDocument();
+	        
+	        encryptChildNodes((Node) document);
+
+	        // Print out the encrypted version.
+			try {
+
+	    		String string = getElementAsString(document.getDocumentElement(), false);
+				
+				File fileOut = new File("XmlEncryptionTest" + ".xml");
+				FileWriter fw = new FileWriter(fileOut);
+				PrintWriter pw = new PrintWriter(fw, true);
+				
+				pw.print(string);
+				
+				pw.close();
+			
+			} catch (Exception ex) {
+				
+				System.out.println("Exception: " + ex);
+			}
+
+
+	    }
+		 // Set up the <DecryptionInfo> element.
+	    private static void setupDecryptionInfo(Element elDecryptionInfo, SecretKey secretKey) {
+	        
+	        Element elDecryptionMethod = document.createElement("Method");
+	        elDecryptionInfo.appendChild(elDecryptionMethod);
+
+	        Element elDecryptionPropertyList = document.createElement("PropertyList");
+	        elDecryptionInfo.appendChild(elDecryptionPropertyList);        
+
+	        Element elDecryptionKey = document.createElement("Key");
+	        elDecryptionInfo.appendChild(elDecryptionKey);
+	        
+	        
+	        // My original goal was to illustrate a variety of <DecryptionInfo> elements so I set
+	        // a control counter.  However, for now we'll just use the raw symmetric key the whole
+	        // time.  Consequently, iDecryptionInfoCounter will always be zero.
+	        //
+	        // Note: The author recognizes that simply specifying the raw decryption key is useless 
+	        // from a security perspective, but the focus of this demo is illustrating how to encrypt
+	        // various types of XML nodes, not proper key management.
+	        if (iDecryptionInfoCounter > 0) {
+	            iDecryptionInfoCounter = 0;
+	        }
+	        
+	        switch (iDecryptionInfoCounter) {
+	            
+	            case 0:
+	                elDecryptionMethod.setAttribute("Algorithm", "http://www.example.org/xmlenc/des");         
+	                
+	                Element elValue = document.createElement("Value");
+	                elDecryptionKey.appendChild(elValue);              
+
+	                String base64EncodedKeyBytes = null;
+	                
+	                try {
+	                    DESKeySpec desKeySpec = (DESKeySpec) SecretKeyFactory.getInstance("DES").getKeySpec(secretKey, DESKeySpec.class);
+	                    base64EncodedKeyBytes = base64Encode(desKeySpec.getKey());            
+	                } catch(Exception ex) {
+	                    ex.printStackTrace();
+	                }
+
+	                Text txtBase64EncodedKeyBytes = document.createTextNode(base64EncodedKeyBytes);
+	                elValue.appendChild(txtBase64EncodedKeyBytes);                
+	                
+	                break;
+	            
+	            case 1:
+	                // Not finished!!!
+	                elDecryptionMethod.setAttribute("Algorithm", "http://www.example.org/xmlenc/rsa");         
+	                
+	                Element elPublicKeyData = document.createElement("PublicKeyData");
+	                elDecryptionKey.appendChild(elPublicKeyData);       
+	                
+	                Element elX509Data = document.createElement("X509Data");
+	                elPublicKeyData.appendChild(elX509Data);                
+	                break;
+	        }
+	        
+	        iDecryptionInfoCounter++;
+	    }
+	    
+		private static void encryptChildNodes(Node nNode) {
+			 
+			
+	        
+	        NodeList nlChildNodes = nNode.getChildNodes();
+	        
+	        for (int i = 0; i < nlChildNodes.getLength(); i++) {
+	            
+	            Node nChildNode = nlChildNodes.item(i);
+	            
+	            if (nChildNode.getNodeType() == Node.ELEMENT_NODE) {
+	            	 System.out.println("encp1");
+	                // If the element has the tag name "ElementToBeEncrypted",
+	                // encrypt the whole element.
+	                if (nChildNode.getNodeName().equals("Employee")||nChildNode.getNodeName().equals("Name")||nChildNode.getNodeName().equals("Id")||nChildNode.getNodeName().equals("Age")) {
+	                	 System.out.println("encp");
+	                    encryptElement((Element) nChildNode, true);
+	                    System.out.println("enc");
+	                }
+	            
+	                // If the element has the tag name "ElementWhoseContentIsToBeEncrypted",
+	                // encrypt its content.
+	               
+	                // Let's check the attributes.
+	                NamedNodeMap nnmAttributes = nChildNode.getAttributes();
+	                
+	                // If an attribute with the name "AttributeValueToBeEncrypted1" or 
+	                // "AttributeValueToBeEncrypted2" is found, encrypt its value.
+	                if (nnmAttributes != null) {
+	                    
+	                    {                 
+	                        Node nAttribute = nnmAttributes.getNamedItem("type");
+	                    
+	                        if (nAttribute != null) {
+	               
+	                            encryptAttributeValue((Attr) nAttribute);
+	                        }
+	                    }
+	                    {
+	                        Node nAttribute = nnmAttributes.getNamedItem("AttributeValueToBeEncrypted2");
+	                    
+	                        if (nAttribute != null) {
+	               
+	                            encryptAttributeValue((Attr) nAttribute);
+	                        }
+	                    }                    
+	                }               
+	            }
+	            
+	            // This is a recursive method.
+	            encryptChildNodes(nChildNode);
+	        }
+	    }
+	    
+		// Encrypt an element.  The boolContentOnly flag controls whether the whole
+	    // element is encrypted or just the content.
+	    public static void encryptElement(Element element, boolean boolContentOnly) {
+	        
+	        // Get the element, or the element content, as a string.
+	        String string = getElementAsString(element, boolContentOnly);
+	        
+	        // The next part is standard JCA code for encrypting.
+	        byte[] bytesToBeEncrypted = string.getBytes();
+	        
+	        SecretKey secretKeyDesKey = null;
+	        
+	        byte[] bytesCiphertext = null;
+	        
+	        try {
+	            Cipher cipherDes = Cipher.getInstance("DES/ECB/PKCS5Padding");
+	            
+	            secretKeyDesKey = KeyGenerator.getInstance("DES").generateKey();
+
+	            cipherDes.init(Cipher.ENCRYPT_MODE, secretKeyDesKey);
+
+	            bytesCiphertext = cipherDes.doFinal(bytesToBeEncrypted);   
+	        } catch (Exception ex) {
+	            System.out.println("Exception: ");
+	            ex.printStackTrace();
+	        }        
+	        
+	        // Base64 the ciphertext.
+	        String base64EncodedElement = base64Encode(bytesCiphertext);
+	        
+	        Text txtBase64EncodedElement = document.createTextNode(base64EncodedElement);
+	        
+	        // Didn't have much luck with ...NS DOM functions so I've commented then out for now.
+	        //Element elEncryptedElement = document.createElementNS("http://www.exampleorg/xmlenc", "EncryptedData");
+
+	        // Create a <DecryptionInfo> element...
+	        Element elDecryptionInfo = document.createElement("DecryptionInfo");        
+	   
+	        setupDecryptionInfo(elDecryptionInfo, secretKeyDesKey);
+
+	        // Create the <EncryptedData> element       
+	        Element elEncryptedData = document.createElement("EncryptedData");
+	        
+	        elEncryptedData.setAttribute("xmlns", "http://www.exampleorg/xmlenc");
+	        
+	        // Append the <DecryptionInfo> child.
+	        elEncryptedData.appendChild(elDecryptionInfo);
+
+	        // Append the <CipherText> child holding the encrypted data.
+	        Element elCipherText = document.createElement("CipherText");
+	        
+	        elCipherText.appendChild(txtBase64EncodedElement);
+	        
+	        elEncryptedData.appendChild(elCipherText);
+	        
+	        // Replace the plaintext node, or nodes, with the <EncryptedData> element.
+	        // If we are only encrypting the element content, we delete the plaintext
+	        // content and insert the new <EncryptedData> element.
+	        // If we are encrypting the whole element, the whole plaintext element is
+	        // replaced with the <EncryptedData> element.
+	        if (boolContentOnly) {
+	            
+	            while (element.hasChildNodes()) {
+	                element.removeChild(element.getChildNodes().item(0));
+	            }
+	        
+	            element.appendChild((Node) elEncryptedData);
+
+	        } else {
+	          
+	            Node nParentNode = element.getParentNode();
+	        
+	            nParentNode.replaceChild(elEncryptedData, element);
+	           
+	        }
+	               
+	        return;
+	    }
+
+	    // Encrypt an attribute value.
+	    public static void encryptAttributeValue(Attr attribute) {
+
+	        // Get the value of the attribute.
+	        String string = attribute.getValue();
+	        
+	        byte[] bytesToBeEncrypted = string.getBytes();
+	        
+	        // Encrypt according to the standard JCA API for encrypting.
+	        SecretKey secretKeyDesKey = null;
+	        
+	        byte[] bytesCiphertext = null;
+	        
+	        try {
+	            Cipher cipherDes = Cipher.getInstance("DES/ECB/PKCS5Padding");
+
+	            secretKeyDesKey = KeyGenerator.getInstance("DES").generateKey();
+
+	            cipherDes.init(Cipher.ENCRYPT_MODE, secretKeyDesKey);
+
+	            bytesCiphertext = cipherDes.doFinal(bytesToBeEncrypted);   
+	        } catch (Exception ex) {
+	            System.out.println("Exception:");
+	            ex.printStackTrace();
+	        }        
+	        
+	        // Base64 encode the encrypted result.
+	        String base64EncodedAttribute = base64Encode(bytesCiphertext);
+	        
+	        // Replace the plaintext value of the attribute with the ciphertext.
+	        attribute.setValue(base64EncodedAttribute);
+	        
+	        // We need to indicate what nodes of the element have been encrypted;
+	        // we do that through an <EncryptedDataManifest> element.
+	        // The <EncryptedDataManifest> element contains a list of <EncryptedData>
+	        // elements indicating the nodes that were encrypted.  An 
+	        // enc:EncryptedDataManifest attribute on an element indicates one or more
+	        // of its child nodes have been encrypted.
+	        Element elParent = attribute.getOwnerElement();
+
+	        if (!elParent.hasAttribute("enc:EncryptedDataManifest")) {
+	            elParent.setAttribute(
+	                    "enc:EncryptedDataManifest", 
+	                    "./EncryptedDataManifest");
+	            elParent.setAttribute(
+	                    "xmlns:enc", 
+	                    "http://www.example.org/xmlenc");
+	        }
+	        
+	        // When the DOM Level 2 ...NS methods are widely implemented, this commented out code
+	        // will be used.
+	        //if (!elParent.hasAttributeNS("http://www.example.org/xmlenc", "EncryptedDataReferences")) {
+	        //    elParent.setAttributeNS("http://www.example.org/xmlenc", 
+	        //            "EncryptedDataReferences", 
+	        //            "./EncryptedDataReferences");
+	        //}
+
+	        // Set up the <EncryptedData> elements for each node that was encrypted.
+	        Element elEncryptedData = document.createElement("EncryptedData");
+
+	        elEncryptedData.setAttribute("Type", "AttributeValue");
+	        elEncryptedData.setAttribute("Name", attribute.getName());
+	        
+	        // Set up the <DecryptionInfo> element and append it.
+	        Element elDecryptionInfo = document.createElement("DecryptionInfo");        
+	        
+	        setupDecryptionInfo(elDecryptionInfo, secretKeyDesKey);
+	               
+	        elEncryptedData.appendChild(elDecryptionInfo);
+	        
+	        // Create the <EncryptedDataManifest> element if it does not yet exist.
+	        // Once it exists, or if it exists already, append the appropriate <EncryptedData>
+	        // elements.
+	        NodeList nlEncryptedDataManifest = elParent.getElementsByTagName("EncryptedDataManifest");
+
+	        if (nlEncryptedDataManifest.getLength() == 0) {
+	            Element elEncryptedDataManifest = document.createElement("EncryptedDataManifest");
+	        
+	            elEncryptedDataManifest.setAttribute("xmlns", "http://www.exampleorg/xmlenc");
+	        
+	            elEncryptedDataManifest.appendChild(elEncryptedData);
+	        
+	            elParent.insertBefore(
+	                    (Node) elEncryptedDataManifest,
+	                    elParent.getFirstChild());
+	        } else {
+	            
+	            Element elEncryptedDataManifest = (Element) nlEncryptedDataManifest.item(0);
+	            
+	            elEncryptedDataManifest.appendChild(elEncryptedData);            
+	        }
+	    
+	        return;
+	    }
+	    /***************************** Utility methods ************************************/	
+		
+		/*
+		    Returns an element as a string.
+		*/
+		
+		private static String getElementAsString(Element el, boolean boolContentOnly) {
+			
+			StringBuffer strbuf = new StringBuffer();
+
+			if (!boolContentOnly) {
+				strbuf.append("<" + el.getTagName());
+
+				NamedNodeMap attrs = el.getAttributes();
+									
+				for (int i=0; i < attrs.getLength(); i++) {
+					
+					Node node = attrs.item(i);
+					
+					strbuf.append(" " + node.getNodeName() + "=\"" + node.getNodeValue() + "\"");
+				}
+			
+				strbuf.append(">");
+			}
+			
+			NodeList nl = el.getChildNodes();
+
+			for (int i=0; i < nl.getLength(); i++) {
+				
+				Node node = nl.item(i);
+				
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					
+					Element elChild = (Element) node;
+					
+					strbuf.append(getElementAsString(elChild, false));
+				}
+
+				if (node.getNodeType() == Node.TEXT_NODE) {
+					
+					strbuf.append(node.getNodeValue());
+				}
+
+				if (node.getNodeType() == Node.CDATA_SECTION_NODE) {
+					
+					strbuf.append("<![CDATA[");
+					
+					strbuf.append(node.getNodeValue());
+					
+					strbuf.append("]]>");
+				}			
+				
+				if (node.getNodeType() == Node.ENTITY_REFERENCE_NODE) {
+					
+					strbuf.append("&");
+					
+					strbuf.append(node.getNodeValue());
+					
+					strbuf.append(";");
+				}
+			}
+
+			if (!boolContentOnly) {
+				strbuf.append("</" + el.getTagName() + ">");
+			}
+			
+			return strbuf.toString().trim();
+		}
+
+	    
+
+		
+		private static String base64Encode(byte[] in) {
+		    
+		    BASE64Encoder encoder = new BASE64Encoder();
+		    
+		    return encoder.encode(in);	
+		}
+
+
+		private static byte[] base64Decode(String strIn) {
+		    
+		    BASE64Decoder decoder = new BASE64Decoder();
+		    
+		    byte[] bytesOut = null;
+		    
+		    try {
+		        bytesOut = decoder.decodeBuffer(strIn);
+		    } catch (Exception ex) {
+		        ex.printStackTrace();
+		    }
+		    
+		    return bytesOut;	
+		}	
+	    
+		 
+/********************************* Decryption ***********************************/	
+	
+	// Decrypt <EncryptedData> elements within an XML instance.
+    private static void decrypt() {	    
+	    
+	    System.out.println("Decrypt...");
+ 
+        // Read in the file with the encrypted nodes.
+        String xmlFile = "XmlEncryptionTest.xml"; 
+
+        DOMParser parser = new DOMParser();
+
+        try {
+            parser.parse(xmlFile);
+
+        } catch (SAXException se) {
+            se.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+        document = parser.getDocument();
+        
+        // Get the list of <EncryptedData> elements.
+        NodeList nlEncryptedData = document.getElementsByTagName("EncryptedData");
+        
+        // Iterate through the <EncryptedData> elements.  DOM node lists are "live"
+        // meaning that changes to any node in the node list is reflected immediately
+        // in the node list itself.  Because the process of decryption continually 
+        // changes the <EncryptedData> node list, incrementing is more convenient to
+        // do from last to first.  XML Encryption provides an excellent opportunity
+        // to become intimately acquainted with the DOM.
+		for (int i = nlEncryptedData.getLength() - 1; i >= 0; i--) {
+			
+			Element elEncryptedData = (Element) nlEncryptedData.item(i);
+			
+			// Decrypt <EncryptedData> according to the type of node it represents.
+			if (elEncryptedData.getAttribute("Type").equals("AttributeValue")) {
+			    
+			    decryptAttributeValue(elEncryptedData);
+			} else {
+			
+			    decryptElement(elEncryptedData);			
+			}
+        }
+        
+        
+        // Save the decrypted document.
+		try {
+
+    		String string = getElementAsString(document.getDocumentElement(), false);
+			
+			File fileOut = new File("XmlEncryptionTestDecryptedNodes" + ".xml");
+			FileWriter fw = new FileWriter(fileOut);
+			PrintWriter pw = new PrintWriter(fw, true);
+			
+			pw.print(string);
+			
+			pw.close();
+		
+		} catch (Exception ex) {
+			
+			System.out.println("Exception: " + ex);
+		}
+
+
+    }
+
+	
+	// Decrypt an <EncryptedData> element that represents an element or element content
+	public static void decryptElement(Element elEncryptedData) {
+	    
+	    // Obtain the ciphertext
+	    StringBuffer strbufEncryptedData = new StringBuffer();
+	    
+		NodeList nl = elEncryptedData.getElementsByTagName("CipherText").item(0).getChildNodes();
+
+		for (int i=0; i < nl.getLength(); i++) {
+		    
+		    Node node = nl.item(i);
+
+			if (node.getNodeType() == Node.TEXT_NODE) {
+				
+				strbufEncryptedData.append(node.getNodeValue());
+			}
+		}
+
+	   	// Initialize a SecretKey object with the bytes of the decryption key
+	   	// from the <DecryptionInfo> element.
+	    byte[] bytesDecryptionKey = getDecryptionKeyBytes(elEncryptedData);
+	    
+	    // Decrypt according to the JCA.
+        SecretKey secretKeyDesKey = null;
+        
+        try {
+            secretKeyDesKey = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(bytesDecryptionKey));
+        } catch (Exception ex) {
+            
+            ex.printStackTrace();
+        }
+	    
+	    // Decrypt the ciphertext
+	    byte[] bytesDecryptedData = decryptString(strbufEncryptedData.toString(), secretKeyDesKey);
+	    
+	    // We now have a string of one element or a node list that needs to be parsed.
+	    String strDecryptedData = new String(bytesDecryptedData);
+	    
+        DOMParser parser = new DOMParser();
+
+        try {
+            // To keep things well formed, we create a dummy root element in case the string is a
+            // node list or more than one node.
+            StringReader stringReader = new StringReader("<dummy>" + strDecryptedData + "</dummy>");
+            
+            InputSource is = new InputSource(stringReader);
+            
+            parser.parse(is);
+
+        } catch (SAXException se) {
+            se.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+        // Great, the plaintext has been parsed.  Now it has to be restored into the document.
+        // First, get the list of nodes to replace the <EncryptedData> element.
+        Node nDecryptedData = (Node) parser.getDocument();
+        
+        // Remember, the <dummy> root element that was needed for parsing; that's why we need
+        // to get its child nodes.
+        NodeList nlDecryptedData = nDecryptedData.getChildNodes().item(0).getChildNodes();
+        
+        // For each of the decrypted nodes, we need to create an "imported" version of it.
+        // In the DOM, nodes are owned by the documents in which they originate.  In this
+        // code we created a dummy document for decrypted nodes and so those decrypted nodes
+        // need to be imported into the main document to replace its <EncryptedData> elements.
+        // Note that importNode() is DOM Level 2 API.
+        Node nDecryptedDataLast = nlDecryptedData.item(nlDecryptedData.getLength()-1);
+        
+        // Note that importNode() is a DOM Level 2 method.  Its functionality can probably
+        // be replaced with a sequence of DOM Level 1 calls but it certainly makes things
+        // much more straight forward for XML Encryption.
+        Node nDecryptedDataImportedLast = document.importNode(nDecryptedDataLast, true);        
+        
+        // The <EncryptedData> node is replaced with the last of the decrypted nodes.
+        // Then, the rest of the decrypted nodes are sequentially inserted in front of the
+        // last inserted decrypted node.
+        Node nParentEncryptedData = (Node) elEncryptedData.getParentNode();
+         
+        nParentEncryptedData.replaceChild(nDecryptedDataImportedLast, (Node) elEncryptedData);
+       
+        for(int i = 0; i < (nlDecryptedData.getLength()-1); i++) {
+        
+
+            Node nDecryptedDataImported = document.importNode(nlDecryptedData.item(i), true);            
+            
+            nParentEncryptedData.insertBefore(nDecryptedDataImported, nDecryptedDataImportedLast);
+            
+            nDecryptedDataLast = nDecryptedDataImported;
+        }	    
+    
+	}
+
+	// Decrypt an attribute value.
+	public static void decryptAttributeValue(Element elEncryptedData) {
+	    
+	    // At this point, we already know the <EncryptedData> element is for an attribute.
+	    // That means its "Name" attribute is the name of the original attribute whose
+	    // value was encrypted.
+        String strAttributeName = elEncryptedData.getAttribute("Name");
+
+        // Though it wouldn't always necessarily be, for this demo it is understood that
+        // the element with the encrypted attribute value is the grandparent of the 
+        // <EncryptedData> element in question.
+        Element elEncryptedDataManifest = (Element) elEncryptedData.getParentNode();
+        
+        Element elElementWithEncryptedAttributeValue = 
+                (Element) elEncryptedDataManifest.getParentNode();
+
+        // Obtain the attribute value ciphertext.
+        String strEncryptedData = elElementWithEncryptedAttributeValue.getAttribute(strAttributeName);
+
+        // Get the bytes of the decryption key from the associated <DecryptionInfo> element and
+        // create a SecretKey object.
+	    byte[] bytesDecryptionKey = getDecryptionKeyBytes(elEncryptedData);
+	    
+        SecretKey secretKeyDesKey = null;
+        
+        try {
+            secretKeyDesKey = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(bytesDecryptionKey));
+        } catch (Exception ex) {
+            
+            ex.printStackTrace();
+        }
+        
+        // Decrypt the attribute value.
+	    byte[] bytesDecryptedData = decryptString(strEncryptedData, secretKeyDesKey);
+	    
+	    // Replace the attribute's ciphertext value with the plaintext value.
+	    String strDecryptedData = new String(bytesDecryptedData);
+	    
+        elElementWithEncryptedAttributeValue.setAttribute(strAttributeName, strDecryptedData); 
+        
+        // Now that <EncryptedData> element has been fully processed, we can get rid of it.
+        elEncryptedDataManifest.removeChild(elEncryptedData);
+        
+        // If the <EncryptedDataManifest> has no more <EncryptedData> elements, get rid of it as well.
+        if (elEncryptedDataManifest.getElementsByTagName("EncryptedData").getLength() == 0) {
+        
+            elElementWithEncryptedAttributeValue.removeAttribute("enc:EncryptedDataManifest");
+        
+            elElementWithEncryptedAttributeValue.removeAttribute("xmlns:enc");
+        
+            NodeList nlEncryptedDataManifest = 
+                    elElementWithEncryptedAttributeValue.getElementsByTagName("EncryptedDataManifest");
+                
+            elElementWithEncryptedAttributeValue.removeChild(elEncryptedDataManifest);
+        }
+       
+	}
+
+
+    // Decrypt a string using the JCA.
+    private static byte[] decryptString(String str, SecretKey secretKeyDesKey) {
+        
+	    byte[] bytesToBeDecrypted = base64Decode(str);
+        
+        byte[] bytesDecryptedData = null;
+        
+        try {
+            Cipher cipherDes = Cipher.getInstance("DES/ECB/PKCS5Padding");
+
+            cipherDes.init(Cipher.DECRYPT_MODE, secretKeyDesKey);
+
+            bytesDecryptedData = cipherDes.doFinal(bytesToBeDecrypted);   
+        } catch (Exception ex) {
+            System.out.println("Exception:");
+            ex.printStackTrace();
+        }     	    
+        
+        return bytesDecryptedData;
+    }
+
+
+    // Get the bytes of the decryption key within the <DecryptionInfo> element.
+    private static byte[] getDecryptionKeyBytes(Element elEncryptedData) {
+	    
+	    Element elDecryptionInfo = (Element) elEncryptedData.getElementsByTagName("DecryptionInfo").item(0);
+	    
+	    Element elKeyValue = (Element) elDecryptionInfo.getElementsByTagName("Value").item(0);
+	    
+	    StringBuffer strbufKeyBytes = new StringBuffer();
+	    
+		NodeList nl = elKeyValue.getChildNodes();
+
+		for (int i=0; i < nl.getLength(); i++) {
+		    
+		    Node node = nl.item(i);
+
+			if (node.getNodeType() == Node.TEXT_NODE) {
+				
+				strbufKeyBytes.append(node.getNodeValue());
+			}
+		}
+		
+		return base64Decode(strbufKeyBytes.toString().trim());		
+	}
+}
+	    
+
+
+
+
